@@ -1,0 +1,201 @@
+PARSER_BEGIN(Parser)
+
+
+/** ID lister. */
+import java.util.List;
+import java.util.LinkedList;
+public class Parser {
+
+  /** Main entry point. */
+   public static void main(String[] args) {
+     Parser parser = new Parser(System.in);
+     ASTNode exp;
+     Enviroment scope = new Enviroment();
+
+     while (true) {
+     try {
+         CodeBlock code = new CodeBlock();
+     exp = parser.Start();
+     //exp.compile(code, scope);
+         // code.dump(System.out);
+         exp.eval(scope);
+     } catch (Exception e) {
+       System.out.println ("Syntax Error!");
+       parser.ReInit(System.in);
+     }
+     }
+   }
+
+
+
+}
+
+PARSER_END(Parser)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\r"
+| "\n"
+}
+
+TOKEN :
+{
+    < LET: "let" >
+  | <STRING: "\""  (~["\""])* "\"" >
+  | < Num: (["0"-"9"]) + >
+  | < PLUS : "+" >
+  | < MINUS : "-">
+  | < TIMES : "*">
+  | < WHILE : "while">
+  | < PRINTLN: "println">
+  | < PRINT: "print">
+  | < NEW: "new">
+  | < IF: "if">
+  | < THEN: "then">
+  | < ELSE: "else">
+  | < END: "end">
+  | < DO: "do">
+  | < DIV : "/">
+  | < LPAR : "(" >
+  | < RPAR : ")" >
+  | < L_CB: "{" >
+  | < R_cb: "}" >
+  | < OP_ATRIB: ":=">
+  | < OP_EQUAL: "==">
+  | < OP_NEQUAL: "~=">
+  | < LTE: "<=">
+  | < GTE: ">=">
+  | < EQUAL: "=" >
+  | < FIM: ";;" >
+  | < SCOLIN: ";" >
+  | < LT: "<">
+  | < GT: ">">
+  | < AND: "&&">
+  | < OR: "||">
+  | < TRUE: "true">
+  | < FALSE: "false">
+  | <NOT: "~">
+  | < Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+}
+
+ASTNode Start():
+{ ASTNode t; }
+{
+   t = Separator() <FIM>
+   { return t; }
+}
+ASTNode Separator() :
+{
+    ASTNode t1,t2;
+}
+{
+    t1 = Assign() ( <SCOLIN> t2 = Assign() {
+                    t1 = new ASTSeparator(t1,t2);
+                    }
+                    )*
+                    {return t1;}
+}
+ASTNode Assign() :
+{
+    ASTNode t1,t2;
+}
+{
+    t1 = BA() ( <OP_ATRIB> t2 = BA() {
+                        t1 = new ASTAtrib(t1,t2);
+                        }
+                        )*
+                        {return t1;}
+}
+ASTNode BA() :
+{
+    ASTNode t1,t2;
+}
+{
+    t1 = BM() ( <OR> t2 = BM() {
+                    t1 = new ASTOr(t1,t2);
+                    }
+                    )*
+                    {return t1;}
+}
+ASTNode BM() :
+{
+    ASTNode t1,t2;
+}
+{
+    t1 = Relops() ( <AND> t2 = Relops() {
+                    t1 = new ASTAnd(t1,t2);
+                    }
+                    )*
+                    {return t1;}
+}
+
+ASTNode Relops() :
+{ Token op;
+    ASTNode t1, t2;
+}
+{
+    t1 = Exp() ( ( op = <LT> | op = <GT> | op = <OP_EQUAL> | op = <OP_NEQUAL> | op = <LTE> | op = <GTE>) t2=Exp(){
+                    if(op.kind == LT)
+                        t1 = new ASTLesser(t1,t2);
+                    else if(op.kind == OP_EQUAL)
+                        t1 = new ASTEqual(t1,t2);
+                    else if(op.kind == OP_NEQUAL)
+                        t1 = new ASTNequal(t1,t2);
+                    else if(op.kind == LTE)
+                        t1 = new ASTLte(t1,t2);
+                    else if(op.kind == GTE)
+                        t1 = new ASTGte(t1,t2);
+                    else
+                        t1 = new ASTGreather(t1,t2);
+                    }
+               )?
+               {return t1;}
+}
+
+ASTNode Exp() :
+{ Token op;
+  ASTNode t1, t2; }
+{
+     t1=Term() ( ( op=<PLUS> | op=<MINUS> ) t2=Term() 
+                 { if (op.kind == PLUS) 
+                         t1 = new ASTPlus(t1,t2);
+                   else  t1 = new ASTSub(t1,t2);
+                 } 
+               ) *
+     { return t1; } 
+}
+
+ASTNode Term() :
+{Token op;
+  ASTNode t1, t2;}
+{
+     t1 = Fact() ( ( op=<TIMES> | op=<DIV> ) t2 = Fact()
+ 		 { if (op.kind == TIMES)
+                                  t1 = new ASTTimes(t1,t2);
+                            else  t1 = new ASTDiv(t1,t2);
+                          }
+		)*
+     { return t1; } 
+}
+
+ASTNode Fact() :
+{ Token n; 
+  ASTNode t;
+  List<Pair<String,ASTNode>> l;}
+{
+    n=<Num> { return new ASTNum(Integer.parseInt(n.image));}
+    | n=<STRING> {return new ASTString(n.image);}
+    | <TRUE> {return new ASTBool(true);}
+    | <FALSE> {return new ASTBool(false);}
+    | <NOT> t=Fact() {return new ASTNot(t);}
+    | n=<Id> { return new ASTId(n.image);}
+    |   <LPAR> t = BA() <RPAR> { return t;}
+    | <MINUS> t=Fact() { return new ASTNeg(t);}
+    | <PRINTLN> <LPAR> t=BA() <RPAR>{ return new ASTPrintLN(t);}
+    | <PRINT> <LPAR> t=BA() <RPAR> { return new ASTPrint(t);}
+    | <L_CB> {l = new LinkedList<Pair<String,ASTNode>>();}
+        (<LET> n=<Id> <EQUAL> t=BA() <SCOLIN> {l.add(new Pair<String,ASTNode>(n.image,t));})+
+        t=Separator() <R_cb> {return new ASTDef(l,t);}
+}

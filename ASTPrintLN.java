@@ -5,7 +5,7 @@ public class ASTPrintLN implements ASTNode{
     }
 
     @Override
-    public IValue eval(Enviroment e) throws ParseException {
+    public IValue eval(Enviroment e) throws Exception {
         IValue value = t.eval(e);
         if(!(value instanceof VNull)) {
             System.out.println(value);

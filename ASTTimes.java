@@ -2,7 +2,7 @@ public class ASTTimes implements ASTNode {
 
     ASTNode lhs, rhs;
 
-    public IValue eval(Enviroment e)throws ParseException
+    public IValue eval(Enviroment e)throws Exception
     {
         IValue left = lhs.eval(e);
         if(left instanceof VInt LEFT){

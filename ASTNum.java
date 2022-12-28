@@ -2,7 +2,7 @@ public class ASTNum implements ASTNode {
 
 int val;
 
-        public IValue eval(Enviroment e) throws ParseException {
+        public IValue eval(Enviroment e) throws Exception {
             return new VInt(val);
         }
 

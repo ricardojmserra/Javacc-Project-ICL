@@ -5,7 +5,7 @@ public class ASTBool implements ASTNode {
     }
 
     @Override
-    public IValue eval(Enviroment e) throws ParseException{
+    public IValue eval(Enviroment e) throws Exception{
         return new VBool(b);
     }
 

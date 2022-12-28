@@ -4,6 +4,11 @@ public class VCell implements IValue{
     IValue value;
 
     public VCell(IValue value){this.value = value;}
+
+    public void setValue(IValue value) {
+        this.value = value;
+    }
+
     @Override
     public String toString() {
         return value.toString();

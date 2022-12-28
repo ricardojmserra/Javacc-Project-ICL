@@ -3,14 +3,13 @@ public class ASTDef implements ASTNode{
     private ASTNode Body;
     private List<Pair<String,ASTNode>> l;
     @Override
-    public IValue eval(Enviroment e) throws ParseException{
+    public IValue eval(Enviroment e) throws Exception{
         e = e.beginScope();
         for(Pair<String, ASTNode> i : l){
             IValue value = i.getValue().eval(e);
-            value = value instanceof VCell ? ((VCell) value).value : value;
-            if(value instanceof VNull)
-                throw new ParseException("Can't define value in function");
-            e.define(i.getKey(), new VCell(value));
+            if(i.isMut())
+                value = new VCell(value);
+            e.define(i.getKey(), value);
         }
 
 

@@ -1,7 +1,7 @@
 import java.util.HashMap;
 
 public class Enviroment {
-    HashMap<String,VCell> Scope;
+    HashMap<String,IValue> Scope;
     Enviroment lastScope;
     int depth;
     public Enviroment(){
@@ -37,7 +37,7 @@ public class Enviroment {
         return lastScope.find(id);
     }
 
-    public void define(String ID, VCell value){
+    public void define(String ID, IValue value){
         this.Scope.put(ID, value);
     }
 }

@@ -6,13 +6,11 @@ public class ASTGreather implements ASTNode{
     }
 
     @Override
-    public IValue eval(Enviroment e)throws ParseException
+    public IValue eval(Enviroment e)throws Exception
     {
         IValue left = lhs.eval(e);
-        left = left instanceof VCell ? ((VCell) left).value : left;
         if(left instanceof VInt LEFT){
             IValue right = rhs.eval(e);
-            right = right instanceof VCell ? ((VCell) right).value : right;
             if(right instanceof VInt RIGHT){
                 return new VBool(LEFT.value > RIGHT.value);
             }

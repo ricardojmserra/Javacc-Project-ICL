@@ -6,7 +6,7 @@ public class ASTSeparator implements ASTNode {
     }
 
     @Override   //Apenas serve para dizer a ordem em que avaliamos as coisas
-    public IValue eval(Enviroment e) throws ParseException {
+    public IValue eval(Enviroment e) throws Exception {
         l.eval(e);
         r.eval(e);
         return new VNull();

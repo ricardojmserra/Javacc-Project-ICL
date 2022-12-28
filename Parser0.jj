@@ -44,6 +44,8 @@ TOKEN :
 {
     < LET: "let" >
   | <STRING: "\""  (~["\""])* "\"" >
+  | < EXCLAMATION: "!" >
+  | < MUT: "mut" >
   | < Num: (["0"-"9"]) + >
   | < PLUS : "+" >
   | < MINUS : "-">
@@ -182,8 +184,9 @@ ASTNode Term() :
 
 ASTNode Fact() :
 { Token n; 
-  ASTNode t;
-  List<Pair<String,ASTNode>> l;}
+  ASTNode t, z;
+  List<Pair<String,ASTNode>> l;
+  boolean isMut;}
 {
     n=<Num> { return new ASTNum(Integer.parseInt(n.image));}
     | n=<STRING> {return new ASTString(n.image);}
@@ -193,9 +196,12 @@ ASTNode Fact() :
     | n=<Id> { return new ASTId(n.image);}
     |   <LPAR> t = BA() <RPAR> { return t;}
     | <MINUS> t=Fact() { return new ASTNeg(t);}
-    | <PRINTLN> <LPAR> t=BA() <RPAR>{ return new ASTPrintLN(t);}
-    | <PRINT> <LPAR> t=BA() <RPAR> { return new ASTPrint(t);}
+    | <PRINTLN>  t=Fact() { return new ASTPrintLN(t);}
+    | <PRINT>  t=Fact()  { return new ASTPrint(t);}
     | <L_CB> {l = new LinkedList<Pair<String,ASTNode>>();}
-        (<LET> n=<Id> <EQUAL> t=BA() <SCOLIN> {l.add(new Pair<String,ASTNode>(n.image,t));})+
+        (<LET> {isMut = false;}(<MUT> {isMut=true;})? n=<Id> <EQUAL> t=BA() <SCOLIN> {l.add(new Pair<String,ASTNode>(n.image,t, isMut));})+
         t=Separator() <R_cb> {return new ASTDef(l,t);}
+    | <EXCLAMATION> t=Fact() {return new ASTPointer(t);}
+    | <NEW> t=Fact() {return new ASTNew(t);}
+    | <WHILE> t=BA() <L_CB> z=Separator() <R_cb> {return new ASTWhile(t, z);}
 }

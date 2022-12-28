@@ -6,13 +6,11 @@ public class ASTOr implements ASTNode {
     }
 
     @Override
-    public IValue eval(Enviroment e)throws ParseException
+    public IValue eval(Enviroment e)throws Exception
     {
         IValue left = lhs.eval(e);
-        left = left instanceof VCell ? ((VCell) left).value : left;
         if(left instanceof VBool LEFT){
             IValue right = rhs.eval(e);
-            right = right instanceof VCell ? ((VCell) right).value : right;
             if(right instanceof VBool RIGHT){
                 return new VBool(LEFT.value || RIGHT.value);
             }

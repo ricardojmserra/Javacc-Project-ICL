@@ -3,9 +3,8 @@ public class ASTNeg implements ASTNode{
 
     public ASTNeg(ASTNode val){ this.val = val;}
     @Override
-    public IValue eval(Enviroment e) throws ParseException{
+    public IValue eval(Enviroment e) throws Exception{
         IValue value = val.eval(e);
-        value = value instanceof VCell ? ((VCell) value).value : value;
         if(value instanceof VInt VALUE)
             return new VInt(-VALUE.value);
         throw new ParseException("Can only negate integers");

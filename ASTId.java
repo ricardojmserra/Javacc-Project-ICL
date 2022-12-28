@@ -1,9 +1,9 @@
 public class ASTId implements ASTNode{
     private String id;
     @Override
-    public IValue eval(Enviroment e) throws ParseException {
-        IValue value = e.find(id);  //Teoricamente tem sempre que ser VCell mas posso eventualmente mudar
-        if(value != null && !(value instanceof VNull))
+    public IValue eval(Enviroment e) throws Exception {
+        IValue value = e.find(id);
+        if(value != null)
             return value;
         throw new ParseException("ID '" + id + "' not defined.");
     }

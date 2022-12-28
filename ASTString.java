@@ -5,7 +5,7 @@ public class ASTString implements ASTNode {
     }
 
     @Override
-    public IValue eval(Enviroment e) throws ParseException{
+    public IValue eval(Enviroment e) throws Exception{
         return new VString(b.substring(1, b.length()-1));   //tirar as aspas da string
     }
 
